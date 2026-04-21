@@ -128,7 +128,7 @@ tbody tr:hover td{background:var(--s2);cursor:pointer}
   <div class="login-card">
     <div class="login-logo">
       <div class="login-logo-name">🚛 TransERP</div>
-      <div class="login-logo-sub">Sistema de Gestión de Transporte de Mercancías</div>
+      <div class="login-logo-sub">Expertos en transporte, gestión y valorización de residuos</div>
     </div>
     <div id="login-err" class="login-err"></div>
     <label class="login-label">Email</label>
@@ -136,14 +136,14 @@ tbody tr:hover td{background:var(--s2);cursor:pointer}
     <label class="login-label">Contraseña</label>
     <input class="login-input" id="l-pass" type="password" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()">
     <button class="login-btn" onclick="doLogin()" id="login-btn">Entrar</button>
-    <div class="login-hint">Usuario inicial: admin@transErp.es / Admin1234!</div>
+    <div class="login-hint">Dynamic TGV — Sistema de Gestión Interno</div>
   </div>
 </div>
 
 <!-- APP -->
 <div id="app">
   <nav class="sb">
-    <div class="sb-logo"><div class="sb-logo-name">TransERP</div><div class="sb-logo-sub">Gestión de Transporte v2.0</div></div>
+    <div class="sb-logo"><div class="sb-logo-name">TransERP</div><div class="sb-logo-sub">Dynamic TGV — Gestión interna</div></div>
     <div class="sb-user"><div class="sb-avatar" id="sb-av">AD</div><div><div class="sb-user-name" id="sb-name">Admin</div><div class="sb-user-role" id="sb-role">admin</div></div></div>
     <div class="sb-sec">
       <div class="sb-sec-lbl">Principal</div>
@@ -154,7 +154,7 @@ tbody tr:hover td{background:var(--s2);cursor:pointer}
     </div>
     <div class="sb-sec">
       <div class="sb-sec-lbl">Mercancías</div>
-      <button class="nb" data-page="adr" onclick="goTo('adr',this)"><span class="nb-icon">☢️</span>Sustancias ADR</button>
+      <button class="nb" data-page="adr" onclick="goTo('adr',this)"><span class="nb-icon">♻️</span>Residuos LER</button>
       <button class="nb" data-page="rutas" onclick="goTo('rutas',this)"><span class="nb-icon">🗺️</span>Rutas</button>
     </div>
     <div class="sb-sec">
@@ -200,12 +200,12 @@ tbody tr:hover td{background:var(--s2);cursor:pointer}
       <div class="page" id="page-expediciones">
         <div class="search-bar">
           <input type="text" id="exp-q" placeholder="🔍 Referencia, cliente, trayecto..." oninput="loadExp()">
-          <select id="exp-fe" onchange="loadExp()"><option value="">Todos los estados</option><option>En ruta</option><option>Cargando</option><option>Planificada</option><option>Entregada</option><option>Incidencia</option><option>Cancelada</option></select>
-          <select id="exp-ft" onchange="loadExp()"><option value="">Todos los tipos</option><option>General</option><option>ADR</option><option>Frigorífico</option><option>Granel sólido</option><option>Granel líquido</option><option>Sobredimensionada</option></select>
+          <select id="exp-fe" onchange="loadExp()"><option value="">Todos los estados</option><option>En curso</option><option>Pendiente recogida</option><option>Planificado</option><option>Completado</option><option>Incidencia</option><option>Cancelado</option></select>
+          <select id="exp-ft" onchange="loadExp()"><option value="">Todos los servicios</option><option>Transporte de residuos</option><option>Gestión de residuos</option><option>Destrucción certificada</option><option>Destrucción confidencial documentación</option><option>Destrucción RAEEs</option><option>Limpieza nave industrial</option><option>Recogida con contenedor</option></select>
         </div>
         <div class="card">
           <div class="card-hdr"><span class="card-title">Expediciones <span id="exp-cnt" style="color:var(--t3);font-weight:400"></span></span><button class="btn btn-primary btn-sm" onclick="openExpModal()">+ Nueva expedición</button></div>
-          <div class="tbl-wrap"><table><thead><tr><th>Referencia</th><th>Fecha</th><th>Cliente</th><th>Trayecto</th><th>Tipo</th><th>Vehículo</th><th>Conductor</th><th>Estado</th><th>€</th><th></th></tr></thead><tbody id="exp-tbody"></tbody></table></div>
+          <div class="tbl-wrap"><table><thead><tr><th>Referencia</th><th>Fecha</th><th>Cliente</th><th>Punto recogida</th><th>Servicio</th><th>Peligrosidad</th><th>Vehículo</th><th>Conductor</th><th>Estado</th><th>€</th><th></th></tr></thead><tbody id="exp-tbody"></tbody></table></div>
         </div>
       </div>
 
@@ -236,9 +236,9 @@ tbody tr:hover td{background:var(--s2);cursor:pointer}
 
       <!-- ADR -->
       <div class="page" id="page-adr">
-        <div class="alert a-blue" style="margin-bottom:16px"><span>ℹ️</span><div>Módulo conforme al <strong>Acuerdo ADR 2023</strong> y Directiva 2008/68/CE.</div></div>
+        <div class="alert a-blue" style="margin-bottom:16px"><span>ℹ️</span><div>Registro de residuos conforme a la <strong>Lista Europea de Residuos (LER)</strong> — Decisión 2014/955/UE y Ley 7/2022 de Residuos y Suelo Contaminado.</div></div>
         <div class="g2">
-          <div class="card"><div class="card-hdr"><span class="card-title">Clases ADR en expediciones activas</span></div>
+          <div class="card"><div class="card-hdr"><span class="card-title">Clasificación de residuos activos</span></div>
             <div class="tbl-wrap"><table><thead><tr><th>Clase</th><th>Descripción</th><th>Exp. activas</th></tr></thead><tbody id="adr-clases"></tbody></table></div>
           </div>
           <div class="card"><div class="card-hdr"><span class="card-title">Requisitos obligatorios</span></div>
@@ -250,7 +250,7 @@ tbody tr:hover td{background:var(--s2);cursor:pointer}
           </div>
         </div>
         <div class="card">
-          <div class="card-hdr"><span class="card-title">Sustancias registradas</span><button class="btn btn-primary btn-sm" onclick="openSustModal()">+ Añadir sustancia</button></div>
+          <div class="card-hdr"><span class="card-title">Catálogo de residuos LER</span><button class="btn btn-primary btn-sm" onclick="openSustModal()">+ Añadir código LER</button></div>
           <div class="tbl-wrap"><table><thead><tr><th>Nº ONU</th><th>Denominación</th><th>Clase</th><th>Grupo</th><th>Inflamación</th><th>EMS</th><th>Túnel</th><th></th></tr></thead><tbody id="adr-tbody"></tbody></table></div>
         </div>
       </div>
@@ -367,7 +367,7 @@ tbody tr:hover td{background:var(--s2);cursor:pointer}
 <!-- MODALS -->
 <!-- Expedición -->
 <div class="overlay" id="m-exp" onclick="if(event.target===this)closeModal('m-exp')">
-  <div class="modal"><div class="modal-hdr"><span class="modal-title" id="m-exp-title">Nueva expedición</span><button class="modal-close" onclick="closeModal('m-exp')">✕</button></div>
+  <div class="modal"><div class="modal-hdr"><span class="modal-title" id="m-exp-title">Nuevo servicio</span><button class="modal-close" onclick="closeModal('m-exp')">✕</button></div>
   <div class="modal-body">
     <input type="hidden" id="exp-id">
     <div class="form-grid">
@@ -485,11 +485,11 @@ tbody tr:hover td{background:var(--s2);cursor:pointer}
 
 <!-- Sustancia -->
 <div class="overlay" id="m-sust" onclick="if(event.target===this)closeModal('m-sust')">
-  <div class="modal"><div class="modal-hdr"><span class="modal-title">Nueva sustancia ADR</span><button class="modal-close" onclick="closeModal('m-sust')">✕</button></div>
+  <div class="modal"><div class="modal-hdr"><span class="modal-title">Nuevo residuo / Código LER</span><button class="modal-close" onclick="closeModal('m-sust')">✕</button></div>
   <div class="modal-body">
     <div class="form-grid">
-      <div class="fg"><label>Nº ONU *</label><input type="text" id="sus-onu" placeholder="Ej: UN 1203"></div>
-      <div class="fg"><label>Clase ADR *</label><select id="sus-clase"><option value="">—</option><option>Clase 1</option><option>Clase 2</option><option>Clase 3</option><option>Clase 4.1</option><option>Clase 5.1</option><option>Clase 6</option><option>Clase 7</option><option>Clase 8</option><option>Clase 9</option></select></div>
+      <div class="fg"><label>Código LER *</label><input type="text" id="sus-onu" placeholder="Ej: LER 20 03 01"></div>
+      <div class="fg"><label>Clasificación *</label><select id="sus-clase"><option value="">—</option><option>Peligroso</option><option>No peligroso</option></select></div>
       <div class="fg full"><label>Denominación oficial *</label><input type="text" id="sus-nombre"></div>
       <div class="fg"><label>Grupo embalaje</label><select id="sus-grupo"><option value="">N/A</option><option>I</option><option>II</option><option>III</option></select></div>
       <div class="fg"><label>Punto de inflamación</label><input type="text" id="sus-inf"></div>
