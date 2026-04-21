@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TransERP — Gestión de Transporte</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#f5f4f0;--surface:#fff;--s2:#f0efe9;--s3:#e8e7e0;
+  --border:rgba(0,0,0,.09);--border2:rgba(0,0,0,.16);
+  --text:#1c1c1a;--t2:#6b6b65;--t3:#a0a09a;
+  --green-bg:#eaf3de;--green:#3b6d11;--green-bd:#a5c97a;
+  --amber-bg:#faeeda;--amber:#854f0b;--amber-bd:#e9b96b;
+  --red-bg:#fcebeb;--red:#a32d2d;--red-bd:#e88a8a;
+  --blue-bg:#e6f1fb;--blue:#185fa5;--blue-bd:#7db8e8;
+  --r:8px;--r2:12px;
+}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);font-size:14px;line-height:1.5}
+#login-screen{display:flex;align-items:center;justify-content:center;height:100vh}
+.login-card{background:var(--surface);border:1px solid var(--border2);border-radius:var(--r2);padding:40px;width:360px;box-shadow:0 8px 40px rgba(0,0,0,.1)}
+.login-logo{text-align:center;margin-bottom:28px}
+.login-logo-name{font-size:24px;font-weight:800;letter-spacing:-.03em}
+.login-logo-sub{font-size:12px;color:var(--t2);margin-top:3px}
+.login-label{display:block;font-size:12px;font-weight:600;color:var(--t2);margin-bottom:5px}
+.login-input{width:100%;padding:10px 12px;border:1px solid var(--border2);border-radius:var(--r);font-size:14px;margin-bottom:14px;font-family:inherit;transition:border .1s}
+.login-input:focus{outline:none;border-color:var(--blue)}
+.login-btn{width:100%;padding:11px;background:var(--text);color:#fff;border:none;border-radius:var(--r);font-size:14px;font-weight:600;cursor:pointer;margin-top:4px;font-family:inherit}
+.login-btn:hover{background:#333}
+.login-err{background:var(--red-bg);color:var(--red);padding:10px 12px;border-radius:var(--r);font-size:13px;margin-bottom:12px;border-left:3px solid var(--red-bd);display:none}
+.login-hint{font-size:11px;color:var(--t3);text-align:center;margin-top:14px}
+#app{display:none;height:100vh;overflow:hidden}
+#app.show{display:flex}
+.sb{width:218px;min-width:218px;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow-y:auto;flex-shrink:0}
+.sb-logo{padding:18px 16px 14px;border-bottom:1px solid var(--border)}
+.sb-logo-name{font-size:16px;font-weight:800;letter-spacing:-.03em}
+.sb-logo-sub{font-size:10px;color:var(--t3);margin-top:1px}
+.sb-user{padding:10px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px}
+.sb-avatar{width:30px;height:30px;border-radius:50%;background:var(--blue-bg);color:var(--blue);font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.sb-user-name{font-size:12px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sb-user-role{font-size:10px;color:var(--t3)}
+.sb-sec{padding:10px 8px 2px}
+.sb-sec-lbl{font-size:10px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.08em;padding:0 8px;margin-bottom:3px}
+.nb{display:flex;align-items:center;gap:9px;padding:7px 10px;border-radius:var(--r);cursor:pointer;font-size:13px;color:var(--t2);border:none;background:none;width:100%;text-align:left;transition:all .12s;font-family:inherit}
+.nb:hover{background:var(--s2);color:var(--text)}.nb.active{background:var(--blue-bg);color:var(--blue);font-weight:600}
+.nb-icon{font-size:14px;width:18px;text-align:center;flex-shrink:0}
+.nb-badge{margin-left:auto;background:var(--red-bg);color:var(--red);font-size:10px;font-weight:700;padding:1px 6px;border-radius:100px;display:none}
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
+.topbar{padding:0 22px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;background:var(--surface);height:52px;flex-shrink:0}
+.topbar-title{font-size:15px;font-weight:700}
+.topbar-right{display:flex;gap:8px;align-items:center}
+.topbar-company{font-size:12px;color:var(--t2)}
+.btn{padding:7px 14px;border-radius:var(--r);font-size:13px;font-weight:500;cursor:pointer;border:1px solid var(--border2);background:var(--surface);color:var(--text);transition:all .1s;white-space:nowrap;font-family:inherit}
+.btn:hover{background:var(--s2)}.btn:active{transform:scale(.98)}
+.btn-primary{background:var(--text);color:#fff;border-color:var(--text)}.btn-primary:hover{background:#333}
+.btn-sm{padding:4px 10px;font-size:12px}
+.btn-danger{border-color:var(--red-bd);color:var(--red)}.btn-danger:hover{background:var(--red-bg)}
+.content{flex:1;overflow-y:auto;padding:20px 22px}
+.page{display:none}.page.active{display:block}
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px}
+.kpi{background:var(--surface);border:1px solid var(--border);border-radius:var(--r2);padding:15px 17px}
+.kpi-lbl{font-size:11px;color:var(--t2);font-weight:500;margin-bottom:7px}
+.kpi-val{font-size:25px;font-weight:800;color:var(--text);letter-spacing:-.02em;line-height:1}
+.kpi-delta{font-size:11px;margin-top:5px;color:var(--t2)}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:15px;margin-bottom:16px}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-bottom:16px}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r2);padding:17px}
+.card-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:13px}
+.card-title{font-size:13px;font-weight:700}
+.tbl-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:12.5px}
+thead th{text-align:left;padding:8px 10px;font-size:11px;font-weight:700;color:var(--t2);border-bottom:2px solid var(--border2);white-space:nowrap;background:var(--s2)}
+tbody td{padding:8px 10px;color:var(--text);border-bottom:1px solid var(--border);vertical-align:middle}
+tbody tr:last-child td{border-bottom:none}
+tbody tr:hover td{background:var(--s2);cursor:pointer}
+.tbl-empty{padding:28px;text-align:center;color:var(--t3);font-size:13px}
+.badge{display:inline-block;padding:3px 9px;border-radius:100px;font-size:11px;font-weight:700;white-space:nowrap}
+.b-green{background:var(--green-bg);color:var(--green)}.b-amber{background:var(--amber-bg);color:var(--amber)}
+.b-red{background:var(--red-bg);color:var(--red)}.b-blue{background:var(--blue-bg);color:var(--blue)}
+.b-gray{background:#f1efe8;color:#5f5e5a}.b-purple{background:#eeedfe;color:#533ab7}
+.alert{padding:11px 13px;border-radius:var(--r);font-size:12.5px;margin-bottom:9px;border-left:3px solid;display:flex;align-items:flex-start;gap:9px}
+.a-red{background:var(--red-bg);color:var(--red);border-color:var(--red-bd)}
+.a-amber{background:var(--amber-bg);color:var(--amber);border-color:var(--amber-bd)}
+.a-green{background:var(--green-bg);color:var(--green);border-color:var(--green-bd)}
+.a-blue{background:var(--blue-bg);color:var(--blue);border-color:var(--blue-bd)}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:13px;margin-bottom:13px}
+.fg{display:flex;flex-direction:column;gap:4px}.fg.full{grid-column:1/-1}
+.fg label{font-size:12px;font-weight:600;color:var(--t2)}
+.fg input,.fg select,.fg textarea{padding:8px 10px;border:1px solid var(--border2);border-radius:var(--r);font-size:13px;background:var(--surface);color:var(--text);font-family:inherit;transition:border .1s}
+.fg input:focus,.fg select:focus,.fg textarea:focus{outline:none;border-color:var(--blue)}
+.fg textarea{resize:vertical;min-height:65px}
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.4);display:none;align-items:center;justify-content:center;z-index:1000;padding:16px}
+.overlay.open{display:flex}
+.modal{background:var(--surface);border-radius:var(--r2);width:100%;max-width:620px;max-height:92vh;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 20px 60px rgba(0,0,0,.2)}
+.modal-hdr{padding:18px 22px 14px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;flex-shrink:0}
+.modal-title{font-size:15px;font-weight:700}
+.modal-close{background:none;border:none;font-size:18px;cursor:pointer;color:var(--t2);width:30px;height:30px;border-radius:var(--r);display:flex;align-items:center;justify-content:center;font-family:inherit}
+.modal-close:hover{background:var(--s2)}
+.modal-body{padding:18px 22px;overflow-y:auto;flex:1}
+.modal-ftr{padding:12px 22px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:9px;flex-shrink:0}
+.pbar{height:6px;border-radius:3px;background:var(--s3);overflow:hidden}.pbar-fill{height:100%;border-radius:3px}
+.pbar-row{margin-bottom:13px}
+.pbar-row-hdr{display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px}
+.stat-row{display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid var(--border);font-size:13px}
+.stat-row:last-child{border-bottom:none}
+.stat-lbl{color:var(--t2)}.stat-val{font-weight:700}
+.search-bar{display:flex;gap:9px;margin-bottom:14px;flex-wrap:wrap;align-items:center}
+.search-bar input,.search-bar select{padding:7px 10px;border:1px solid var(--border2);border-radius:var(--r);font-size:13px;background:var(--surface);color:var(--text);font-family:inherit}
+.search-bar input{width:250px}.search-bar select{min-width:135px}
+.list-row{display:flex;align-items:flex-start;gap:11px;padding:9px 0;border-bottom:1px solid var(--border);font-size:13px}
+.list-row:last-child{border-bottom:none}
+.dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-top:5px}
+.bar-chart{display:flex;align-items:flex-end;gap:5px;height:75px}
+.bar-col{flex:1;border-radius:3px 3px 0 0;min-height:3px}
+.bar-lbl{display:flex;justify-content:space-between;font-size:10px;color:var(--t3);margin-top:4px}
+.toast{position:fixed;bottom:22px;right:22px;background:var(--text);color:#fff;padding:11px 16px;border-radius:var(--r);font-size:13px;font-weight:500;z-index:9999;opacity:0;transform:translateY(8px);transition:all .3s;pointer-events:none;max-width:300px}
+.toast.show{opacity:1;transform:translateY(0)}
+.section-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.section-hdr h2{font-size:14px;font-weight:700}
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="login-screen">
+  <div class="login-card">
+    <div class="login-logo">
+      <div class="login-logo-name">🚛 TransERP</div>
+      <div class="login-logo-sub">Sistema de Gestión de Transporte de Mercancías</div>
+    </div>
+    <div id="login-err" class="login-err"></div>
+    <label class="login-label">Email</label>
+    <input class="login-input" id="l-email" type="email" placeholder="admin@transErp.es" autocomplete="username">
+    <label class="login-label">Contraseña</label>
+    <input class="login-input" id="l-pass" type="password" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()">
+    <button class="login-btn" onclick="doLogin()" id="login-btn">Entrar</button>
+    <div class="login-hint">Usuario inicial: admin@transErp.es / Admin1234!</div>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app">
+  <nav class="sb">
+    <div class="sb-logo"><div class="sb-logo-name">TransERP</div><div class="sb-logo-sub">Gestión de Transporte v2.0</div></div>
+    <div class="sb-user"><div class="sb-avatar" id="sb-av">AD</div><div><div class="sb-user-name" id="sb-name">Admin</div><div class="sb-user-role" id="sb-role">admin</div></div></div>
+    <div class="sb-sec">
+      <div class="sb-sec-lbl">Principal</div>
+      <button class="nb active" data-page="dashboard" onclick="goTo('dashboard',this)"><span class="nb-icon">📊</span>Dashboard</button>
+      <button class="nb" data-page="expediciones" onclick="goTo('expediciones',this)"><span class="nb-icon">📦</span>Expediciones</button>
+      <button class="nb" data-page="flota" onclick="goTo('flota',this)"><span class="nb-icon">🚛</span>Flota</button>
+      <button class="nb" data-page="conductores" onclick="goTo('conductores',this)"><span class="nb-icon">👤</span>Conductores</button>
+    </div>
+    <div class="sb-sec">
+      <div class="sb-sec-lbl">Mercancías</div>
+      <button class="nb" data-page="adr" onclick="goTo('adr',this)"><span class="nb-icon">☢️</span>Sustancias ADR</button>
+      <button class="nb" data-page="rutas" onclick="goTo('rutas',this)"><span class="nb-icon">🗺️</span>Rutas</button>
+    </div>
+    <div class="sb-sec">
+      <div class="sb-sec-lbl">Gestión</div>
+      <button class="nb" data-page="clientes" onclick="goTo('clientes',this)"><span class="nb-icon">🏢</span>Clientes</button>
+      <button class="nb" data-page="facturacion" onclick="goTo('facturacion',this)"><span class="nb-icon">💶</span>Facturación</button>
+      <button class="nb" data-page="alertas" onclick="goTo('alertas',this)"><span class="nb-icon">🔔</span>Alertas<span class="nb-badge" id="alert-badge">0</span></button>
+    </div>
+    <div class="sb-sec">
+      <div class="sb-sec-lbl">Sistema</div>
+      <button class="nb" data-page="informes" onclick="goTo('informes',this)"><span class="nb-icon">📈</span>Informes</button>
+      <button class="nb" data-page="config" onclick="goTo('config',this)"><span class="nb-icon">⚙️</span>Configuración</button>
+      <button class="nb" onclick="logout()" style="color:var(--red)"><span class="nb-icon">🚪</span>Cerrar sesión</button>
+    </div>
+  </nav>
+
+  <div class="main">
+    <div class="topbar">
+      <span class="topbar-title" id="page-title">Dashboard</span>
+      <div class="topbar-right">
+        <span class="topbar-company" id="top-company">TransERP</span>
+        <button class="btn btn-primary" id="main-btn" onclick="mainAction()">+ Nueva expedición</button>
+      </div>
+    </div>
+    <div class="content">
+
+      <!-- DASHBOARD -->
+      <div class="page active" id="page-dashboard">
+        <div class="kpis" id="dash-kpis"></div>
+        <div class="g2">
+          <div class="card"><div class="card-hdr"><span class="card-title">Últimas expediciones</span></div>
+            <div class="tbl-wrap"><table><thead><tr><th>Ref.</th><th>Trayecto</th><th>Carga</th><th>Estado</th></tr></thead><tbody id="dash-exp-tbody"></tbody></table></div>
+          </div>
+          <div class="card"><div class="card-hdr"><span class="card-title">Alertas activas</span><button class="btn btn-sm" onclick="goTo('alertas')">Ver todas</button></div><div id="dash-alerts"></div></div>
+        </div>
+        <div class="g2">
+          <div class="card"><div class="card-hdr"><span class="card-title">Disponibilidad flota</span></div><div id="dash-flota"></div></div>
+          <div class="card"><div class="card-hdr"><span class="card-title">Expediciones (7 días)</span></div><div class="bar-chart" id="dash-chart"></div><div class="bar-lbl" id="dash-chart-lbl"></div><div style="margin-top:10px" id="dash-stats"></div></div>
+        </div>
+      </div>
+
+      <!-- EXPEDICIONES -->
+      <div class="page" id="page-expediciones">
+        <div class="search-bar">
+          <input type="text" id="exp-q" placeholder="🔍 Referencia, cliente, trayecto..." oninput="loadExp()">
+          <select id="exp-fe" onchange="loadExp()"><option value="">Todos los estados</option><option>En ruta</option><option>Cargando</option><option>Planificada</option><option>Entregada</option><option>Incidencia</option><option>Cancelada</option></select>
+          <select id="exp-ft" onchange="loadExp()"><option value="">Todos los tipos</option><option>General</option><option>ADR</option><option>Frigorífico</option><option>Granel sólido</option><option>Granel líquido</option><option>Sobredimensionada</option></select>
+        </div>
+        <div class="card">
+          <div class="card-hdr"><span class="card-title">Expediciones <span id="exp-cnt" style="color:var(--t3);font-weight:400"></span></span><button class="btn btn-primary btn-sm" onclick="openExpModal()">+ Nueva expedición</button></div>
+          <div class="tbl-wrap"><table><thead><tr><th>Referencia</th><th>Fecha</th><th>Cliente</th><th>Trayecto</th><th>Tipo</th><th>Vehículo</th><th>Conductor</th><th>Estado</th><th>€</th><th></th></tr></thead><tbody id="exp-tbody"></tbody></table></div>
+        </div>
+      </div>
+
+      <!-- FLOTA -->
+      <div class="page" id="page-flota">
+        <div class="kpis" id="flota-kpis"></div>
+        <div class="card">
+          <div class="card-hdr"><span class="card-title">Registro de flota</span><button class="btn btn-primary btn-sm" onclick="openVehModal()">+ Añadir vehículo</button></div>
+          <div class="search-bar" style="margin-bottom:11px">
+            <input type="text" id="veh-q" placeholder="🔍 Matrícula, marca..." oninput="renderFlota()">
+            <select id="veh-fe" onchange="renderFlota()"><option value="">Todos los estados</option><option>Disponible</option><option>En ruta</option><option>Mantenimiento</option><option>Bloqueado</option></select>
+          </div>
+          <div class="tbl-wrap"><table><thead><tr><th>Matrícula</th><th>Tipo</th><th>Marca · Modelo</th><th>Año</th><th>ITV</th><th>Seguro</th><th>Km</th><th>ADR</th><th>Estado</th><th></th></tr></thead><tbody id="flota-tbody"></tbody></table></div>
+        </div>
+      </div>
+
+      <!-- CONDUCTORES -->
+      <div class="page" id="page-conductores">
+        <div class="card">
+          <div class="card-hdr"><span class="card-title">Plantilla de conductores</span><button class="btn btn-primary btn-sm" onclick="openCondModal()">+ Añadir conductor</button></div>
+          <div class="search-bar" style="margin-bottom:11px">
+            <input type="text" id="cond-q" placeholder="🔍 Nombre, DNI..." oninput="renderCond()">
+            <select id="cond-fe" onchange="renderCond()"><option value="">Todos</option><option>Disponible</option><option>En ruta</option><option>Baja</option></select>
+          </div>
+          <div class="tbl-wrap"><table><thead><tr><th>Nombre</th><th>DNI</th><th>Carné</th><th>Certif. ADR</th><th>CAP</th><th>Teléfono</th><th>Estado</th><th></th></tr></thead><tbody id="cond-tbody"></tbody></table></div>
+        </div>
+      </div>
+
+      <!-- ADR -->
+      <div class="page" id="page-adr">
+        <div class="alert a-blue" style="margin-bottom:16px"><span>ℹ️</span><div>Módulo conforme al <strong>Acuerdo ADR 2023</strong> y Directiva 2008/68/CE.</div></div>
+        <div class="g2">
+          <div class="card"><div class="card-hdr"><span class="card-title">Clases ADR en expediciones activas</span></div>
+            <div class="tbl-wrap"><table><thead><tr><th>Clase</th><th>Descripción</th><th>Exp. activas</th></tr></thead><tbody id="adr-clases"></tbody></table></div>
+          </div>
+          <div class="card"><div class="card-hdr"><span class="card-title">Requisitos obligatorios</span></div>
+            <div class="list-row"><div class="dot" style="background:var(--green)"></div><div><strong>Carta de porte ADR</strong> — Nº ONU, cantidad, grupo embalaje</div></div>
+            <div class="list-row"><div class="dot" style="background:var(--green)"></div><div><strong>Ficha de seguridad SDS</strong> — 16 secciones (norma REACH)</div></div>
+            <div class="list-row"><div class="dot" style="background:var(--green)"></div><div><strong>Certificado conductor ADR</strong> — Vigente, máx. 5 años</div></div>
+            <div class="list-row"><div class="dot" style="background:var(--blue)"></div><div><strong>Equipo de emergencia</strong> — Extintor, calzos, EPI obligatorio</div></div>
+            <div class="list-row"><div class="dot" style="background:var(--blue)"></div><div><strong>Consejero DPAM</strong> — Informe anual a autoridad competente</div></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-hdr"><span class="card-title">Sustancias registradas</span><button class="btn btn-primary btn-sm" onclick="openSustModal()">+ Añadir sustancia</button></div>
+          <div class="tbl-wrap"><table><thead><tr><th>Nº ONU</th><th>Denominación</th><th>Clase</th><th>Grupo</th><th>Inflamación</th><th>EMS</th><th>Túnel</th><th></th></tr></thead><tbody id="adr-tbody"></tbody></table></div>
+        </div>
+      </div>
+
+      <!-- RUTAS -->
+      <div class="page" id="page-rutas">
+        <div class="g2">
+          <div class="card">
+            <div class="card-hdr"><span class="card-title">Rutas activas (esquema)</span></div>
+            <div style="background:#dde9dd;border-radius:var(--r);height:195px;overflow:hidden;margin-bottom:14px;border:1px solid var(--border)">
+              <svg width="100%" height="100%" viewBox="0 0 500 195" xmlns="http://www.w3.org/2000/svg">
+                <rect width="500" height="195" fill="#dde9dd"/>
+                <path d="M30,155 Q120,75 250,105 Q350,130 470,55" stroke="#c5d5c5" stroke-width="14" fill="none" stroke-linecap="round"/>
+                <path d="M50,165 Q160,145 280,105 Q370,75 460,125" stroke="#c5d5c5" stroke-width="10" fill="none" stroke-linecap="round"/>
+                <path d="M60,150 Q130,80 250,103 Q350,125 440,57" stroke="#185FA5" stroke-width="2.5" fill="none" stroke-dasharray="7,4"/>
+                <path d="M75,160 Q170,135 280,103 Q360,77 450,120" stroke="#a32d2d" stroke-width="2" fill="none"/>
+                <circle cx="185" cy="102" r="6" fill="#185FA5"/><circle cx="185" cy="102" r="11" fill="none" stroke="#185FA5" stroke-width="1.5" opacity=".4"/>
+                <circle cx="315" cy="97" r="6" fill="#3b6d11"/>
+                <text x="42" y="165" font-size="9" fill="#444" font-family="sans-serif">BCN</text>
+                <text x="428" y="53" font-size="9" fill="#444" font-family="sans-serif">MAD</text>
+                <text x="60" y="175" font-size="9" fill="#a32d2d" font-family="sans-serif">MAL</text>
+                <text x="436" y="136" font-size="9" fill="#444" font-family="sans-serif">GRX</text>
+              </svg>
+            </div>
+            <div style="font-size:11px;color:var(--t2)"><span style="color:var(--blue);font-weight:700">━━</span> Estándar &nbsp; <span style="color:var(--red);font-weight:700">━━</span> ADR &nbsp; 🔵 En tránsito</div>
+          </div>
+          <div class="card"><div class="card-hdr"><span class="card-title">Rutas más utilizadas</span></div>
+            <div class="tbl-wrap"><table><thead><tr><th>Ruta</th><th>Tipo habitual</th><th>Total exp.</th></tr></thead><tbody id="rutas-tbody"></tbody></table></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- CLIENTES -->
+      <div class="page" id="page-clientes">
+        <div class="card">
+          <div class="card-hdr"><span class="card-title">Cartera de clientes</span><button class="btn btn-primary btn-sm" onclick="openCliModal()">+ Nuevo cliente</button></div>
+          <div class="search-bar" style="margin-bottom:11px">
+            <input type="text" id="cli-q" placeholder="🔍 Empresa, CIF, sector..." oninput="renderCli()">
+            <select id="cli-fe" onchange="renderCli()"><option value="">Todos</option><option>Activo</option><option>Inactivo</option><option>Riesgo moroso</option></select>
+          </div>
+          <div class="tbl-wrap"><table><thead><tr><th>Empresa</th><th>CIF</th><th>Sector</th><th>Carga</th><th>Contacto</th><th>Teléfono</th><th>Pago</th><th>Estado</th><th></th></tr></thead><tbody id="cli-tbody"></tbody></table></div>
+        </div>
+      </div>
+
+      <!-- FACTURACIÓN -->
+      <div class="page" id="page-facturacion">
+        <div class="kpis" id="fac-kpis"></div>
+        <div class="card">
+          <div class="card-hdr"><span class="card-title">Facturas</span><button class="btn btn-primary btn-sm" onclick="openFacModal()">+ Emitir factura</button></div>
+          <div class="search-bar" style="margin-bottom:11px">
+            <input type="text" id="fac-q" placeholder="🔍 Número, cliente..." oninput="renderFac()">
+            <select id="fac-fe" onchange="renderFac()"><option value="">Todos los estados</option><option>Pendiente</option><option>Enviada</option><option>Cobrada</option><option>Vencida</option></select>
+          </div>
+          <div class="tbl-wrap"><table><thead><tr><th>Nº Factura</th><th>Fecha</th><th>Cliente</th><th>Base</th><th>IVA 21%</th><th>Total</th><th>Vencimiento</th><th>Estado</th><th></th></tr></thead><tbody id="fac-tbody"></tbody></table></div>
+        </div>
+      </div>
+
+      <!-- ALERTAS -->
+      <div class="page" id="page-alertas">
+        <div class="section-hdr"><h2>Centro de alertas</h2><button class="btn" onclick="loadAlertas()">🔄 Actualizar</button></div>
+        <div id="alertas-container"></div>
+      </div>
+
+      <!-- INFORMES -->
+      <div class="page" id="page-informes">
+        <div class="g3">
+          <div class="card"><div class="card-title" style="margin-bottom:13px">Top 5 clientes</div><div id="inf-cli"></div></div>
+          <div class="card"><div class="card-title" style="margin-bottom:13px">Por tipo de carga</div><div id="inf-tipo"></div></div>
+          <div class="card"><div class="card-title" style="margin-bottom:13px">Métricas del mes</div><div id="inf-mes"></div></div>
+        </div>
+        <div class="card"><div class="card-title" style="margin-bottom:13px">Facturación últimos 6 meses</div><div id="inf-fac"></div></div>
+      </div>
+
+      <!-- CONFIG -->
+      <div class="page" id="page-config">
+        <div class="g2">
+          <div class="card">
+            <div class="card-title" style="margin-bottom:16px">Datos de la empresa</div>
+            <div class="form-grid">
+              <div class="fg"><label>Razón social</label><input id="cfg-razon" type="text"></div>
+              <div class="fg"><label>CIF</label><input id="cfg-cif" type="text"></div>
+              <div class="fg"><label>Autorización MTE</label><input id="cfg-aut" type="text"></div>
+              <div class="fg"><label>Consejero DPAM</label><input id="cfg-dpam" type="text"></div>
+              <div class="fg full"><label>Dirección</label><input id="cfg-dir" type="text"></div>
+              <div class="fg"><label>Teléfono</label><input id="cfg-tel" type="text"></div>
+              <div class="fg"><label>Email</label><input id="cfg-email" type="email"></div>
+            </div>
+            <button class="btn btn-primary" onclick="saveConfig()">Guardar configuración</button>
+          </div>
+          <div class="card">
+            <div class="card-title" style="margin-bottom:14px">Umbrales de alerta (días)</div>
+            <div class="form-grid">
+              <div class="fg"><label>Aviso ITV</label><input id="cfg-itv" type="number" min="1"></div>
+              <div class="fg"><label>Aviso ADR conductor</label><input id="cfg-adr" type="number" min="1"></div>
+              <div class="fg"><label>Aviso seguro</label><input id="cfg-seg" type="number" min="1"></div>
+              <div class="fg"><label>Aviso factura vencida</label><input id="cfg-fac" type="number" min="1"></div>
+            </div>
+            <div style="margin-top:14px;padding-top:12px;border-top:1px solid var(--border)">
+              <div class="card-title" style="margin-bottom:10px">Cambiar contraseña</div>
+              <div class="form-grid">
+                <div class="fg"><label>Contraseña actual</label><input id="pw-current" type="password"></div>
+                <div class="fg"><label>Nueva contraseña</label><input id="pw-new" type="password"></div>
+              </div>
+              <button class="btn" onclick="changePassword()">Cambiar contraseña</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- MODALS -->
+<!-- Expedición -->
+<div class="overlay" id="m-exp" onclick="if(event.target===this)closeModal('m-exp')">
+  <div class="modal"><div class="modal-hdr"><span class="modal-title" id="m-exp-title">Nueva expedición</span><button class="modal-close" onclick="closeModal('m-exp')">✕</button></div>
+  <div class="modal-body">
+    <input type="hidden" id="exp-id">
+    <div class="form-grid">
+      <div class="fg"><label>Cliente *</label><select id="exp-cli"></select></div>
+      <div class="fg"><label>Fecha salida *</label><input type="date" id="exp-fecha"></div>
+      <div class="fg"><label>Origen *</label><input type="text" id="exp-origen" placeholder="Ciudad de origen"></div>
+      <div class="fg"><label>Destino *</label><input type="text" id="exp-destino" placeholder="Ciudad de destino"></div>
+      <div class="fg"><label>Tipo de carga *</label>
+        <select id="exp-tipo" onchange="document.getElementById('exp-adr-row').style.display=this.value==='ADR'?'':'none'">
+          <option value="">Seleccionar...</option><option>General</option><option>ADR</option><option>Frigorífico</option><option>Granel sólido</option><option>Granel líquido</option><option>Sobredimensionada</option>
+        </select>
+      </div>
+      <div class="fg" id="exp-adr-row" style="display:none"><label>Clase ADR</label>
+        <select id="exp-adr"><option value="">Sin especificar</option><option>Clase 1 — Explosivos</option><option>Clase 2 — Gases</option><option>Clase 3 — Líquidos inflamables</option><option>Clase 4 — Sólidos inflamables</option><option>Clase 5 — Comburentes</option><option>Clase 6 — Tóxicos / Infecciosos</option><option>Clase 7 — Radioactivos</option><option>Clase 8 — Corrosivos</option><option>Clase 9 — Varios peligrosos</option></select>
+      </div>
+      <div class="fg"><label>Vehículo</label><select id="exp-veh"></select></div>
+      <div class="fg"><label>Conductor</label><select id="exp-cond"></select></div>
+      <div class="fg"><label>Peso (kg)</label><input type="number" id="exp-peso"></div>
+      <div class="fg"><label>Km estimados</label><input type="number" id="exp-km"></div>
+      <div class="fg"><label>Importe (€ sin IVA) *</label><input type="number" id="exp-importe" step="0.01"></div>
+      <div class="fg"><label>Estado</label><select id="exp-estado"><option>Planificada</option><option>Cargando</option><option>En ruta</option><option>Entregada</option><option>Incidencia</option><option>Cancelada</option></select></div>
+      <div class="fg full"><label>Observaciones</label><textarea id="exp-obs"></textarea></div>
+    </div>
+  </div>
+  <div class="modal-ftr"><button class="btn" onclick="closeModal('m-exp')">Cancelar</button><button class="btn btn-primary" onclick="saveExp()">Guardar</button></div>
+  </div>
+</div>
+
+<!-- Vehículo -->
+<div class="overlay" id="m-veh" onclick="if(event.target===this)closeModal('m-veh')">
+  <div class="modal"><div class="modal-hdr"><span class="modal-title" id="m-veh-title">Nuevo vehículo</span><button class="modal-close" onclick="closeModal('m-veh')">✕</button></div>
+  <div class="modal-body">
+    <input type="hidden" id="veh-id">
+    <div class="form-grid">
+      <div class="fg"><label>Matrícula *</label><input type="text" id="veh-mat"></div>
+      <div class="fg"><label>Tipo *</label><select id="veh-tipo"><option value="">Seleccionar...</option><option>Tráiler estándar</option><option>Cisterna ADR</option><option>Frigorífico</option><option>Furgón</option><option>Volquete</option><option>Plataforma</option></select></div>
+      <div class="fg"><label>Marca</label><input type="text" id="veh-marca"></div>
+      <div class="fg"><label>Modelo</label><input type="text" id="veh-modelo"></div>
+      <div class="fg"><label>Año</label><input type="number" id="veh-anio"></div>
+      <div class="fg"><label>Km actuales</label><input type="number" id="veh-km"></div>
+      <div class="fg"><label>Venc. ITV</label><input type="date" id="veh-itv"></div>
+      <div class="fg"><label>Venc. seguro</label><input type="date" id="veh-seg"></div>
+      <div class="fg"><label>Certif. ADR (si aplica)</label><input type="date" id="veh-adr"></div>
+      <div class="fg"><label>Capacidad (kg)</label><input type="number" id="veh-cap"></div>
+      <div class="fg"><label>Estado</label><select id="veh-estado"><option>Disponible</option><option>En ruta</option><option>Mantenimiento</option><option>Bloqueado</option></select></div>
+      <div class="fg full"><label>Observaciones</label><textarea id="veh-obs"></textarea></div>
+    </div>
+  </div>
+  <div class="modal-ftr"><button class="btn" onclick="closeModal('m-veh')">Cancelar</button><button class="btn btn-primary" onclick="saveVeh()">Guardar</button></div>
+  </div>
+</div>
+
+<!-- Conductor -->
+<div class="overlay" id="m-cond" onclick="if(event.target===this)closeModal('m-cond')">
+  <div class="modal"><div class="modal-hdr"><span class="modal-title" id="m-cond-title">Nuevo conductor</span><button class="modal-close" onclick="closeModal('m-cond')">✕</button></div>
+  <div class="modal-body">
+    <input type="hidden" id="cond-id">
+    <div class="form-grid">
+      <div class="fg"><label>Nombre completo *</label><input type="text" id="cond-nombre"></div>
+      <div class="fg"><label>DNI / NIE</label><input type="text" id="cond-dni"></div>
+      <div class="fg"><label>Tipo carné</label><select id="cond-carne"><option value="">—</option><option>B</option><option>C</option><option>C+E</option><option>D</option></select></div>
+      <div class="fg"><label>Venc. carné</label><input type="date" id="cond-cvenc"></div>
+      <div class="fg"><label>Venc. certif. ADR</label><input type="date" id="cond-adr"></div>
+      <div class="fg"><label>Venc. CAP</label><input type="date" id="cond-cap"></div>
+      <div class="fg"><label>Teléfono</label><input type="tel" id="cond-tel"></div>
+      <div class="fg"><label>Email</label><input type="email" id="cond-email"></div>
+      <div class="fg"><label>Estado</label><select id="cond-estado"><option>Disponible</option><option>En ruta</option><option>Baja</option><option>Vacaciones</option></select></div>
+      <div class="fg full"><label>Observaciones</label><textarea id="cond-obs"></textarea></div>
+    </div>
+  </div>
+  <div class="modal-ftr"><button class="btn" onclick="closeModal('m-cond')">Cancelar</button><button class="btn btn-primary" onclick="saveCond()">Guardar</button></div>
+  </div>
+</div>
+
+<!-- Cliente -->
+<div class="overlay" id="m-cli" onclick="if(event.target===this)closeModal('m-cli')">
+  <div class="modal"><div class="modal-hdr"><span class="modal-title" id="m-cli-title">Nuevo cliente</span><button class="modal-close" onclick="closeModal('m-cli')">✕</button></div>
+  <div class="modal-body">
+    <input type="hidden" id="cli-id">
+    <div class="form-grid">
+      <div class="fg"><label>Razón social *</label><input type="text" id="cli-razon"></div>
+      <div class="fg"><label>CIF</label><input type="text" id="cli-cif"></div>
+      <div class="fg"><label>Sector</label><input type="text" id="cli-sector"></div>
+      <div class="fg"><label>Carga habitual</label><select id="cli-carga"><option value="">—</option><option>General</option><option>ADR</option><option>Frigorífico</option><option>Granel sólido</option><option>Granel líquido</option><option>Mixto</option></select></div>
+      <div class="fg"><label>Contacto</label><input type="text" id="cli-contacto"></div>
+      <div class="fg"><label>Teléfono</label><input type="tel" id="cli-tel"></div>
+      <div class="fg"><label>Email</label><input type="email" id="cli-email"></div>
+      <div class="fg"><label>Dirección fiscal</label><input type="text" id="cli-dir"></div>
+      <div class="fg"><label>Días de pago</label><select id="cli-pago"><option>30 días</option><option>60 días</option><option>90 días</option><option>Contado</option><option>Pago anticipado</option></select></div>
+      <div class="fg"><label>Estado</label><select id="cli-estado"><option>Activo</option><option>Inactivo</option><option>Riesgo moroso</option></select></div>
+      <div class="fg full"><label>Observaciones</label><textarea id="cli-obs"></textarea></div>
+    </div>
+  </div>
+  <div class="modal-ftr"><button class="btn" onclick="closeModal('m-cli')">Cancelar</button><button class="btn btn-primary" onclick="saveCli()">Guardar</button></div>
+  </div>
+</div>
+
+<!-- Factura -->
+<div class="overlay" id="m-fac" onclick="if(event.target===this)closeModal('m-fac')">
+  <div class="modal"><div class="modal-hdr"><span class="modal-title">Emitir factura</span><button class="modal-close" onclick="closeModal('m-fac')">✕</button></div>
+  <div class="modal-body">
+    <div class="form-grid">
+      <div class="fg"><label>Cliente *</label><select id="fac-cli"></select></div>
+      <div class="fg"><label>Fecha emisión *</label><input type="date" id="fac-fecha"></div>
+      <div class="fg"><label>Base imponible (€) *</label><input type="number" id="fac-base" step="0.01" oninput="document.getElementById('fac-total').value='€ '+(parseFloat(this.value||0)*1.21).toFixed(2)"></div>
+      <div class="fg"><label>Total con IVA (21%)</label><input type="text" id="fac-total" readonly style="background:var(--s2)"></div>
+      <div class="fg"><label>Fecha vencimiento</label><input type="date" id="fac-vence"></div>
+      <div class="fg"><label>Estado</label><select id="fac-estado"><option>Pendiente</option><option>Enviada</option><option>Cobrada</option><option>Vencida</option></select></div>
+      <div class="fg full"><label>Concepto / Expediciones incluidas</label><textarea id="fac-concepto"></textarea></div>
+    </div>
+  </div>
+  <div class="modal-ftr"><button class="btn" onclick="closeModal('m-fac')">Cancelar</button><button class="btn btn-primary" onclick="saveFac()">Emitir factura</button></div>
+  </div>
+</div>
+
+<!-- Sustancia -->
+<div class="overlay" id="m-sust" onclick="if(event.target===this)closeModal('m-sust')">
+  <div class="modal"><div class="modal-hdr"><span class="modal-title">Nueva sustancia ADR</span><button class="modal-close" onclick="closeModal('m-sust')">✕</button></div>
+  <div class="modal-body">
+    <div class="form-grid">
+      <div class="fg"><label>Nº ONU *</label><input type="text" id="sus-onu" placeholder="Ej: UN 1203"></div>
+      <div class="fg"><label>Clase ADR *</label><select id="sus-clase"><option value="">—</option><option>Clase 1</option><option>Clase 2</option><option>Clase 3</option><option>Clase 4.1</option><option>Clase 5.1</option><option>Clase 6</option><option>Clase 7</option><option>Clase 8</option><option>Clase 9</option></select></div>
+      <div class="fg full"><label>Denominación oficial *</label><input type="text" id="sus-nombre"></div>
+      <div class="fg"><label>Grupo embalaje</label><select id="sus-grupo"><option value="">N/A</option><option>I</option><option>II</option><option>III</option></select></div>
+      <div class="fg"><label>Punto de inflamación</label><input type="text" id="sus-inf"></div>
+      <div class="fg"><label>Código EMS</label><input type="text" id="sus-ems"></div>
+      <div class="fg"><label>Restricción túneles</label><select id="sus-tunel"><option value="">Sin restricción</option><option>B</option><option>B/D</option><option>C</option><option>D</option><option>E</option></select></div>
+      <div class="fg full"><label>Instrucciones de emergencia</label><textarea id="sus-inst"></textarea></div>
+    </div>
+  </div>
+  <div class="modal-ftr"><button class="btn" onclick="closeModal('m-sust')">Cancelar</button><button class="btn btn-primary" onclick="saveSust()">Guardar</button></div>
+  </div>
+</div>
+
+<!-- Detalle expedición -->
+<div class="overlay" id="m-det" onclick="if(event.target===this)closeModal('m-det')">
+  <div class="modal" style="max-width:680px"><div class="modal-hdr"><span class="modal-title" id="m-det-title">Expedición</span><button class="modal-close" onclick="closeModal('m-det')">✕</button></div>
+  <div class="modal-body" id="m-det-body"></div>
+  <div class="modal-ftr" id="m-det-ftr"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+<script src="app.js"></script>
+</body>
+</html>
