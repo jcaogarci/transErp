@@ -28,16 +28,12 @@ pool.connect((err) => {
 // ============================================================
 // MIDDLEWARE
 // ============================================================
-app.use(cors({
-  origin: process.env.NODE_ENV === 'production'
-    ? [process.env.FRONTEND_URL, /\.onrender\.com$/, /\.railway\.app$/]
-    : '*',
-  credentials: true,
-}));
+app.set("trust proxy", 1);
+app.use(cors({ origin: '*', credentials: true }));
 app.use(express.json({ limit: '2mb' }));
 app.use(express.static(path.join(__dirname, '../frontend/public')));
 
-const limiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 500, standardHeaders: true });
+const limiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 500, standardHeaders: true, legacyHeaders: false });
 app.use('/api', limiter);
 
 // ============================================================
