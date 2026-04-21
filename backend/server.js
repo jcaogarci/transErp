@@ -71,13 +71,26 @@ const err = (res, e, code = 500) => { console.error(e); res.status(code).json({ 
 // ============================================================
 // AUTH ROUTES
 // ============================================================
+// Ruta temporal para resetear contraseña de admin (solo en producción inicial)
+app.post('/api/auth/reset-admin', async (req, res) => {
+  try {
+    const { secret, nueva_password } = req.body;
+    if (secret !== 'RESET_TRANSERP_2025') return res.status(403).json({ error: 'No autorizado' });
+    const hash = await bcrypt.hash(nueva_password, 10);
+    await q("UPDATE usuarios SET password_hash=$1 WHERE email='admin@transErp.es'", [hash]);
+    res.json({ ok: true, message: 'Contraseña reseteada. Hash: ' + hash });
+  } catch(e) { res.status(500).json({ error: e.message }); }
+});
+
 app.post('/api/auth/login', async (req, res) => {
   try {
     const { email, password } = req.body;
     if (!email || !password) return res.status(400).json({ error: 'Email y contraseña requeridos' });
     const { rows } = await q('SELECT * FROM usuarios WHERE email=$1 AND activo=true', [email.toLowerCase().trim()]);
-    if (!rows[0]) return res.status(401).json({ error: 'Credenciales incorrectas' });
+    if (!rows[0]) return res.status(401).json({ error: 'Usuario no encontrado' });
+    console.log('Login intento:', email, '| Hash en DB:', rows[0].password_hash.substring(0,20));
     const valid = await bcrypt.compare(password, rows[0].password_hash);
+    console.log('Contraseña válida:', valid);
     if (!valid) return res.status(401).json({ error: 'Credenciales incorrectas' });
     const token = jwt.sign({ id: rows[0].id, nombre: rows[0].nombre, email: rows[0].email, rol: rows[0].rol }, JWT_SECRET, { expiresIn: '8h' });
     ok(res, { token, user: { id: rows[0].id, nombre: rows[0].nombre, email: rows[0].email, rol: rows[0].rol } });
